@@ -1,61 +1,69 @@
-Sauce Labs Demo App E2E Test Suite
-Overview
-Welcome to the Sauce Labs Demo App E2E Test Suite! This project contains end-to-end tests for the Sauce Labs Demo App, which allows you to verify various functionalities of the application. Below, you will find a detailed description of the implemented tests, the technologies used, and instructions for generating reports.
+# Sauce Demo E2E Testing Project
 
-Application Under Test
-URL: Sauce Labs Demo App
-Test Scenarios
-1. Login Functionality
-   Valid Login: Tests successful login with valid credentials.
-   Invalid Login: Tests login with invalid credentials and ensures appropriate error messages are displayed.
-2. Product Page
-   Product Display: Verifies that all products are displayed correctly.
-   Product Details: Validates product details including name, price, and description.
-   Sorting Functionality: Ensures products are sorted correctly by price.
-3. Shopping Cart
-   Add to Cart: Tests adding a product to the shopping cart and verifies the cart is updated.
-   Remove from Cart: Tests removing a product from the shopping cart and ensures the cart updates correctly.
-   Badge Count: Verifies that the shopping cart badge count updates correctly when items are added or removed.
-4. User Logout
-   Logout Functionality: Ensures that users are redirected to the login page after logging out.
-   Technologies Used
-   Test Framework: TestNG
-   Reporting: Allure Reporting
-   Browser Automation: Selenium WebDriver
-   Test Runner: Java
-   Getting Started
-   Prerequisites
-   Java 21 or later
-   Maven or Gradle
-   Selenium WebDriver
-   Allure Commandline Tool
-   Setup
-   Clone the Repository:
+This project contains end-to-end (E2E) tests for the Sauce Labs Demo App (https://www.saucedemo.com/). The tests are implemented using Selenium WebDriver with Java and TestNG framework.
 
-bash
-Copy code
-git clone <repository-url>
-cd <repository-directory>
-Install Dependencies:
-Make sure to have the necessary dependencies by running:
+## Test Scenarios
 
-bash
-Copy code
-mvn install
-Run Tests:
-To execute the tests, use the following command:
+The following scenarios are covered in our E2E tests:
 
-bash
-Copy code
-mvn test
-Generate Allure Report:
-After running the tests, generate and view the Allure report using the command:
+1. Login Functionality:
+   - Test login with valid credentials
+   - Test login with invalid credentials
+   - Verify appropriate error messages for invalid login attempts
 
-bash
-Copy code
+2. Product Page:
+   - Verify all products are displayed correctly
+   - Validate product details (name, price, and description)
+   - Test sorting functionality by price
+
+3. Shopping Cart:
+   - Add a product to the cart and verify cart update
+   - Remove a product from the cart and verify cart update
+   - Verify shopping cart badge count updates correctly
+
+4. User Logout:
+   - Test logout functionality and redirection to login page
+
+## Project Structure
+
+- `src/main/java`: Contains the main source code
+   - `com.saucedemo.config`: Configuration classes
+   - `com.saucedemo.driver`: WebDriver factory and management
+   - `com.saucedemo.pages`: Page Object Model classes
+- `src/test/java`: Contains the test classes
+   - `com.saucedemo.tests`: TestNG test classes
+
+## Dependencies
+
+- Selenium WebDriver
+- TestNG
+- Allure for reporting
+- JavaFaker for generating test data
+
+## Running the Tests
+
+To run the tests, use the following command:
+mvn clean test
+
+## Generating Allure Reports
+
+After running the tests, Allure results will be generated in the `allure-results` directory. To view the report, use the following command:
 allure serve allure-results
-Troubleshooting
-If you encounter any issues or errors, ensure that:
 
-The appSettings.json file is correctly configured with the necessary test settings.
-The Allure command line tool is installed and properly configured.
+This will start a local server and open the Allure report in your default web browser.
+
+## Configuration
+
+Test configuration is managed through the `appSettings.json` file located in `src/main/resources`. This file contains settings for:
+
+- Browser type
+- Application URL
+- Test run type (local/remote)
+
+## Contributing
+
+Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE.md file for details.
