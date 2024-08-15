@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Install Xvfb and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1)
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          curl -L -o chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          chmod +x chromedriver
+          sudo mv chromedriver /usr/local/bin/
+
+      - name: Run tests with Xvfb
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -ac -screen 0 1280x1024x24 &
+          sleep 3
+          mvn clean test
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          sudo apt-get install -y apt-transport-https
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository ppa:qameta/allure
+          sudo apt-get update
+          sudo apt-get install -y allure
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Upload Screenshots
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: screenshots
+          path: screenshots
