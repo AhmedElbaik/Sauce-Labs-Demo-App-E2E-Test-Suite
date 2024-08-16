@@ -34,18 +34,23 @@ jobs:
 
       - name: Install ChromeDriver
         run: |
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+')
-          echo "Detected Chrome Version: $CHROME_VERSION"
+          # Extract the major version of Chrome
+          CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9]+' | head -n 1)
+          echo "Detected Chrome Major Version: $CHROME_VERSION"
           if [ -z "$CHROME_VERSION" ]; then
             echo "Failed to detect Chrome version."
             exit 1
           fi
+
+          # Get the appropriate ChromeDriver version
           CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
           echo "Detected ChromeDriver Version: $CHROMEDRIVER_VERSION"
           if [ -z "$CHROMEDRIVER_VERSION" ]; then
             echo "Failed to get ChromeDriver version."
             exit 1
           fi
+
+          # Download and install ChromeDriver
           curl -L -o chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver.zip
           chmod +x chromedriver
