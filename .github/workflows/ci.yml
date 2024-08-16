@@ -43,7 +43,12 @@ jobs:
           fi
 
           # Get the appropriate ChromeDriver version
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          # Option 1: Using ChromeDriver official download site
+          CHROMEDRIVER_VERSION=$(curl -sL "https://chromedriver.chromium.org/downloads/LATEST_RELEASE_$CHROME_VERSION")
+
+          # Option 2: Checking for Chrome version existence (if using Google Cloud Storage API)
+          # curl -sLf "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" > /dev/null 2>&1 && CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION") || echo "Chrome version $CHROME_VERSION not found"
+
           echo "Detected ChromeDriver Version: $CHROMEDRIVER_VERSION"
           if [ -z "$CHROMEDRIVER_VERSION" ]; then
             echo "Failed to get ChromeDriver version."
