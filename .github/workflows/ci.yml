@@ -36,12 +36,20 @@ jobs:
           sudo chown root:root /usr/local/bin/chromedriver
           sudo chmod 0755 /usr/local/bin/chromedriver
           chromedriver --version
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
       - name: Run tests with Xvfb
         run: |
           export DISPLAY=:99
           Xvfb :99 -ac -screen 0 1280x1024x24 &
           sleep 3
-          mvn clean test
+          mvn test
       - name: Generate Allure Report
         if: always()
         run: |
@@ -50,6 +58,7 @@ jobs:
           sudo add-apt-repository ppa:qameta/allure
           sudo apt-get update
           sudo apt-get install -y allure
+          allure generate target/allure-results --clean -o allure-report
       - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v2
