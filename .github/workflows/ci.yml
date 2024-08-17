@@ -25,18 +25,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
+          google-chrome --version
       - name: Install ChromeDriver
         run: |
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | awk -F'.' '{print $1}')
-          echo "Chrome version: $CHROME_VERSION"
-          LATEST_CHROMEDRIVER=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          echo "Latest ChromeDriver version: $LATEST_CHROMEDRIVER"
-          wget -N "https://chromedriver.storage.googleapis.com/${LATEST_CHROMEDRIVER}/chromedriver_linux64.zip" -P ~/
+          CHROMEDRIVER_VERSION=114.0.5735.90
+          wget -N "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" -P ~/
           unzip ~/chromedriver_linux64.zip -d ~/
           rm ~/chromedriver_linux64.zip
           sudo mv -f ~/chromedriver /usr/local/bin/chromedriver
           sudo chown root:root /usr/local/bin/chromedriver
           sudo chmod 0755 /usr/local/bin/chromedriver
+          chromedriver --version
       - name: Run tests with Xvfb
         run: |
           export DISPLAY=:99
