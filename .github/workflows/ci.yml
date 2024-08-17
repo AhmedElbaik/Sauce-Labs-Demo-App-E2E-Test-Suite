@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
     branches:
@@ -7,67 +6,41 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
       - name: Set up JDK 21
         uses: actions/setup-java@v2
         with:
           java-version: '21'
           distribution: 'temurin'
-
       - name: Install Xvfb and dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
-
       - name: Install Chrome
         run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
-
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
       - name: Install ChromeDriver
         run: |
-          # Extract the major version of Chrome
-          CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9]+' | head -n 1)
-          echo "Detected Chrome Major Version: $CHROME_VERSION"
-          if [ -z "$CHROME_VERSION" ]; then
-            echo "Failed to detect Chrome version."
-            exit 1
-          fi
-
-          # Get the appropriate ChromeDriver version
-          # Option 1: Using ChromeDriver official download site
-          CHROMEDRIVER_VERSION=$(curl -sL "https://chromedriver.chromium.org/downloads/LATEST_RELEASE_$CHROME_VERSION")
-
-          # Option 2: Checking for Chrome version existence (if using Google Cloud Storage API)
-          # curl -sLf "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" > /dev/null 2>&1 && CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION") || echo "Chrome version $CHROME_VERSION not found"
-
-          echo "Detected ChromeDriver Version: $CHROMEDRIVER_VERSION"
-          if [ -z "$CHROMEDRIVER_VERSION" ]; then
-            echo "Failed to get ChromeDriver version."
-            exit 1
-          fi
-
-          # Download and install ChromeDriver
-          curl -L -o chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip chromedriver.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/
-
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          CHROMEDRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%%.*}")
+          wget -N "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" -P ~/
+          unzip ~/chromedriver_linux64.zip -d ~/
+          rm ~/chromedriver_linux64.zip
+          sudo mv -f ~/chromedriver /usr/local/bin/chromedriver
+          sudo chown root:root /usr/local/bin/chromedriver
+          sudo chmod 0755 /usr/local/bin/chromedriver
       - name: Run tests with Xvfb
         run: |
           export DISPLAY=:99
           Xvfb :99 -ac -screen 0 1280x1024x24 &
           sleep 3
           mvn clean test
-
       - name: Generate Allure Report
         if: always()
         run: |
@@ -76,14 +49,12 @@ jobs:
           sudo add-apt-repository ppa:qameta/allure
           sudo apt-get update
           sudo apt-get install -y allure
-
       - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: allure-report
           path: allure-report
-
       - name: Upload Screenshots
         if: always()
         uses: actions/upload-artifact@v2
